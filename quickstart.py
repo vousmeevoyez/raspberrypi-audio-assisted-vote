@@ -1,3 +1,8 @@
+""" 
+    Listen Stream
+    ____________________
+    this is module where we interact with microphone and open stream to google speech API
+"""
 from __future__ import division
 
 import re
@@ -9,12 +14,29 @@ from google.cloud.speech import types
 import pyaudio
 from six.moves import queue
 
-# Audio recording parameters
-RATE = 44100
-CHUNK = int(RATE / 10)  # 100ms
+from ctypes import *
+from contextlib import contextmanager
 
+from config.config import *
 
-class MicrophoneStream(object):
+"""
+    CONSUME ERROR CODE HERE SO IT DISPLAY LOG CORRECTLY
+"""
+ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+
+def py_error_handler(filename, line, function, err, fmt):
+    pass
+
+c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+
+@contextmanager
+def noalsaerr():
+    asound = cdll.LoadLibrary('libasound.so')
+    asound.snd_lib_error_set_handler(c_error_handler)
+    yield
+    asound.snd_lib_error_set_handler(None)
+
+class MicrophoneStream:
     """Opens a recording stream as a generator yielding the audio chunks."""
     def __init__(self, rate, chunk):
         self._rate = rate
@@ -25,23 +47,24 @@ class MicrophoneStream(object):
         self.closed = True
 
     def __enter__(self):
-        self._audio_interface = pyaudio.PyAudio()
-        self._audio_stream = self._audio_interface.open(
-            format=pyaudio.paInt16,
-            # The API currently only supports 1-channel (mono) audio
-            # https://goo.gl/z757pE
-            channels=1, rate=self._rate,
-            input_device_index=2,
-            input=True, frames_per_buffer=self._chunk,
-            # Run the audio stream asynchronously to fill the buffer object.
-            # This is necessary so that the input device's buffer doesn't
-            # overflow while the calling thread makes network requests, etc.
-            stream_callback=self._fill_buffer,
-        )
+        with noalsaerr():
+            self._audio_interface = pyaudio.PyAudio()
+            self._audio_stream = self._audio_interface.open(
+                format=pyaudio.paInt16,
+                # The API currently only supports 1-channel (mono) audio
+                # https://goo.gl/z757pE
+                channels=1, rate=self._rate,
+                # select devices here
+                input_device_index=2,
+                input=True, frames_per_buffer=self._chunk,
+                # Run the audio stream asynchronously to fill the buffer object.
+                # This is necessary so that the input device's buffer doesn't
+                # overflow while the calling thread makes network requests, etc.
+                stream_callback=self._fill_buffer,
+            )
 
-        self.closed = False
-
-        return self
+            self.closed = False
+            return self
 
     def __exit__(self, type, value, traceback):
         self._audio_stream.stop_stream()
@@ -126,25 +149,26 @@ def listen_print_loop(responses):
         else:
             print(transcript + overwrite_chars)
 
-            # Exit recognition if any of the transcribed phrases could be
-            # one of our keywords.
-            if re.search(r'\b(exit|quit)\b', transcript, re.I):
-                print('Exiting..')
-                break
+            check_command(transcript)
 
             num_chars_printed = 0
 
+def check_command(transcript):
+    if re.search(r'\b(tampilkan)\b', transcript, re.I):
+        print("Show candidate here")
+
+    elif re.search(r'\b(pilih)\b', transcript, re.I):
+        print("choose candidate here")
+
+    elif re.search(r'\b(keluar|berhenti)\b', transcript, re.I):
+        print('Exiting..')
 
 def main():
-    # See http://g.co/cloud/speech/docs/languages
-    # for a list of supported languages.
-    language_code = 'id-ID'  # a BCP-47 language tag
-
     client = speech.SpeechClient()
     config = types.RecognitionConfig(
         encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
-        language_code=language_code)
+        language_code=LANGUAGE)
     streaming_config = types.StreamingRecognitionConfig(
         config=config,
         interim_results=True)

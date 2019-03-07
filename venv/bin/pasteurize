@@ -1,4 +1,4 @@
-#!/home/pi/apps/open-vote-api/venv/bin/python
+#!/home/pi/apps/raspberrypi-audio-assisted-vote/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
