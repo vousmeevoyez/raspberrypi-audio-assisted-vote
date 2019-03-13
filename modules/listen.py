@@ -19,6 +19,9 @@ from contextlib import contextmanager
 
 from config.config import *
 
+# services
+from modules.services import VoteServices
+
 """
     CONSUME ERROR CODE HERE SO IT DISPLAY LOG CORRECTLY
 """
@@ -154,7 +157,10 @@ def listen_print_loop(responses):
             num_chars_printed = 0
 
 def check_command(transcript):
-    if re.search(r'\b(tampilkan)\b', transcript, re.I):
+    if re.search(r'\b(masuk)|login\b', transcript, re.I):
+        print("login here")
+
+    elif re.search(r'\b(tampilkan)\b', transcript, re.I):
         print("Show candidate here")
 
     elif re.search(r'\b(pilih)\b', transcript, re.I):
@@ -163,7 +169,7 @@ def check_command(transcript):
     elif re.search(r'\b(keluar|berhenti)\b', transcript, re.I):
         print('Exiting..')
 
-def main():
+def start():
     client = speech.SpeechClient()
     config = types.RecognitionConfig(
         encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
@@ -185,4 +191,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    start()
