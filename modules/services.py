@@ -6,7 +6,7 @@
 import requests
 import json
 
-from config.config import *
+from config import *
 
 class VoteServices:
 

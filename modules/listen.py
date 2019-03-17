@@ -5,6 +5,7 @@
 """
 from __future__ import division
 
+import os
 import re
 import sys
 
@@ -17,10 +18,10 @@ from six.moves import queue
 from ctypes import *
 from contextlib import contextmanager
 
-from config.config import *
+from config import *
 
 # services
-from modules.services import VoteServices
+from services import VoteServices
 
 """
     CONSUME ERROR CODE HERE SO IT DISPLAY LOG CORRECTLY
@@ -157,8 +158,13 @@ def listen_print_loop(responses):
             num_chars_printed = 0
 
 def check_command(transcript):
-    if re.search(r'\b(masuk)|login\b', transcript, re.I):
+    # match first word with all registered command
+    if re.search(r'\masuk|login\b', transcript, re.I):
+        # get access token here
         print("login here")
+        print(transcript)
+        #access_token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+        #print(access_token)
 
     elif re.search(r'\b(tampilkan)\b', transcript, re.I):
         print("Show candidate here")
