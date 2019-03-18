@@ -16,3 +16,10 @@ ROUTES = {
     "CANDIDATES" : "/elections/{}/candidates/",
     "VOTE"       : "/votes/{}"
 }
+SPEECH_RESPONSE = {
+    "GREETING"   : "Halo {}",
+    "FIRST_STEP" : "untuk dapat ke tahap selanjutnya silahkan katakan tampilkan\
+    kandidat",
+    "SECOND_STEP": "Pilih kandidat dengan katakan pilih kandidat",
+    "THIRD_SETP" : "Suara anda telah terekam, terima kasih"
+}
