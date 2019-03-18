@@ -197,7 +197,7 @@ def start():
         sample_rate_hertz=RATE,
         language_code=LANGUAGE,
         speech_contexts=HELPER_KEYWORD,
-        model=SPEECH_MODEL
+        #model=SPEECH_MODEL
     )
     # initialize streaming config
     streaming_config = types.StreamingRecognitionConfig(
