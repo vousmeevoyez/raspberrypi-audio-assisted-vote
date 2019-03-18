@@ -125,8 +125,11 @@ def check_command(transcript):
     if re.search(r'\masuk|login\b', transcript, re.I):
         # get access token here
         print("login here")
-        # split text here
-        command, username = transcript.split(" ")
+        try:
+            command, username = transcript.split(" ")
+        except ValueError:
+            text_to_speech(SPEECH_RESPONSE["UNKNOWN"])
+        #end try
         access_token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
         print(access_token)
 

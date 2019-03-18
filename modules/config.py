@@ -17,6 +17,7 @@ ROUTES = {
     "VOTE"       : "/votes/{}"
 }
 SPEECH_RESPONSE = {
+    "UNKNOWN"    : "Perintah tidak dikenali, silahkan ulangi",
     "GREETING"   : "Halo {}",
     "FIRST_STEP" : "untuk dapat ke tahap selanjutnya silahkan katakan tampilkan\
     kandidat",
