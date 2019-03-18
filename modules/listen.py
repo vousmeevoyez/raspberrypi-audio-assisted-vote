@@ -196,8 +196,8 @@ def start():
         encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
         language_code=LANGUAGE,
-        speech_contexts=["masuk", "tampilkan", "pilih"],
-        model="command_and_search"
+        speech_contexts=[speech.types.SpeechContext(phrases=[HELPER_KEYWORD])],
+        model=[speech.types.SpeechContext(model=SPEECH_MODEL)]
     )
     # initialize streaming config
     streaming_config = types.StreamingRecognitionConfig(
