@@ -106,6 +106,16 @@ class MicrophoneStream:
 
             yield b''.join(data)
 
+def listen_result(responses):
+    for response in responses:
+        # we only care about the top results
+        result = response.results[0]
+        # we only care about top alternatives
+        transcript = result.alternatives[0].transcript
+        # if result is final print that command
+        if result.is_final:
+            print(transcript)
+
 
 def listen_print_loop(responses):
     """Iterates through server responses and prints them.
@@ -176,11 +186,20 @@ def check_command(transcript):
         print('Exiting..')
 
 def start():
+    """
+        start listening microphone and initialize stream to google
+    """
+    # start speech client
     client = speech.SpeechClient()
+    # initialize recogition config
     config = types.RecognitionConfig(
         encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
-        language_code=LANGUAGE)
+        language_code=LANGUAGE,
+        speech_contexts=HELPER_KEYWORD,
+        model=SPEECH_MODEL
+    )
+    # initialize streaming config
     streaming_config = types.StreamingRecognitionConfig(
         config=config,
         interim_results=True)
@@ -193,8 +212,7 @@ def start():
         responses = client.streaming_recognize(streaming_config, requests)
 
         # Now, put the transcription responses to use.
-        listen_print_loop(responses)
-
+        listen_result(responses)
 
 if __name__ == '__main__':
     start()
