@@ -111,6 +111,8 @@ class MicrophoneStream:
 def listen_result(responses):
     for response in responses:
         # we only care about the top results
+        print(response)
+        '''
         result = response.results[0]
         # we only care about top alternatives
         transcript = result.alternatives[0].transcript
@@ -122,6 +124,7 @@ def listen_result(responses):
             # command is not recognized throw an error here
             if result is False:
                 text_to_speech(SPEECH_RESPONSE["UNKNOWN"])
+        '''
 
 def check_command(transcript):
     # match first word with all registered command
