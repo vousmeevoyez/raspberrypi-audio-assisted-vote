@@ -144,6 +144,8 @@ def check_command(transcript):
 
     elif re.search(r'\b(keluar|berhenti)\b', transcript, re.I):
         print('Exiting..')
+    else:
+        return False
 
 def start():
     """
