@@ -108,77 +108,107 @@ class MicrophoneStream:
 
             yield b''.join(data)
 
-def listen_result(responses):
-    for response in responses:
-        # we only care about the top results
-        print(response)
-        '''
-        result = response.results[0]
-        # we only care about top alternatives
-        transcript = result.alternatives[0].transcript
-        # if result is final print that command
-        if result.is_final:
-            print(transcript)
-            # check command for further processing
-            result = check_command(transcript)
-            # command is not recognized throw an error here
-            if result is False:
-                text_to_speech(SPEECH_RESPONSE["UNKNOWN"])
-        '''
+class SpeechProcessing:
+    """ processing all the speech here"""
 
-def check_command(transcript):
-    # match first word with all registered command
-    if re.search(r'\masuk|login\b', transcript, re.I):
-        # get access token here
-        print("login here")
+    @staticmethod
+    def _convert_to_transcript(responses):
+        """ convert cloud speech response to final transcript """
+        finalize_transcript = ""
+        for response in responses:
+            transcript = response.alter
+            if response.is_final:
+                finalize_transcript = transcript
+                # stop
+                break
+            #end if
+        #end for
+        return finalize_transcript
+
+    @staticmethod
+    def _convert_to_command(transcript):
+        """
+            match transcript to known command
+            if its known executed it and if its not return an error
+        """
+        response = {
+            "status"   : "RECOGNIZED",
+            "feedback" : ""
+        }
+        # first split result into "command and value"
         try:
-            command, username = transcript.split(" ")
+            command, value = transcript.split(" ")
         except ValueError:
-            return False
-        #end try
-        access_token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
-        print(access_token)
+            response["status"] = "UNKNOWN"
+            response["feedback"] = SPEECH_RESPONSE["UNKNOWN"]
 
-    elif re.search(r'\b(tampilkan)\b', transcript, re.I):
-        print("Show candidate here")
+        # match first word with all registered command
+        if re.search(r'\masuk|login\b', transcript, re.I):
+            username = value
+            access_token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+            # should access token here
+            print(access_token)
+            # set feedback to login success
+            response["feedback"] = \
+            (SPEECH_RESPONSE["FIRST_STEP"]).format(username)
 
-    elif re.search(r'\b(pilih)\b', transcript, re.I):
-        print("choose candidate here")
+        elif re.search(r'\b(tampilkan)\b', transcript, re.I):
+            print("Show candidate here")
 
-    elif re.search(r'\b(keluar|berhenti)\b', transcript, re.I):
-        print('Exiting..')
-    else:
-        return False
+        elif re.search(r'\b(pilih)\b', transcript, re.I):
+            print("choose candidate here")
 
-def start():
-    """
-        start listening microphone and initialize stream to google
-    """
-    # start speech client
-    client = speech.SpeechClient()
-    # initialize recogition config
-    config = types.RecognitionConfig(
-        encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=RATE,
-        language_code=LANGUAGE,
-        speech_contexts=[speech.types.SpeechContext(phrases=HELPER_KEYWORD)],
-        model=SPEECH_MODEL
-    )
-    # initialize streaming config
-    streaming_config = types.StreamingRecognitionConfig(
-        config=config,
-        single_utterance=True,
-        interim_results=True)
+        elif re.search(r'\b(keluar|berhenti)\b', transcript, re.I):
+            print('Exiting..')
+        else:
+            response["status"] = "UNKNOWN"
+            response["feedback"] = SPEECH_RESPONSE["UNKNOWN"]
 
-    with MicrophoneStream(RATE, CHUNK) as stream:
-        audio_generator = stream.generator()
-        requests = (types.StreamingRecognizeRequest(audio_content=content)
-                    for content in audio_generator)
+        return response
 
-        responses = client.streaming_recognize(streaming_config, requests)
+    @staticmethod
+    def _process_feedback(command):
+        # process the feedback
+        if command["result"] == "RECOGNIZED":
+            text_to_speech(command["feedback"])
+        else:
+            text_to_speech(command["feedback"])
+        return True
 
-        # Now, put the transcription responses to use.
-        listen_result(responses)
+    def stream_and_listen(self):
+        """
+            start listening microphone and initialize stream to google
+        """
+        # start speech client
+        client = speech.SpeechClient()
+        # initialize recogition config
+        config = types.RecognitionConfig(
+            encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
+            sample_rate_hertz=RATE,
+            language_code=LANGUAGE,
+            speech_contexts=[speech.types.SpeechContext(phrases=HELPER_KEYWORD)],
+            model=SPEECH_MODEL
+        )
+        # initialize streaming config
+        streaming_config = types.StreamingRecognitionConfig(
+            config=config,
+            single_utterance=True,
+            interim_results=True)
+
+        command = ""
+        while command != "exit":
+            command = input("enter command ")
+            with MicrophoneStream(RATE, CHUNK) as stream:
+                audio_generator = stream.generator()
+                requests = (types.StreamingRecognizeRequest(audio_content=content)
+                            for content in audio_generator)
+
+                responses = client.streaming_recognize(streaming_config, requests)
+                transcript = self._convert_to_transcript(responses)
+                feedback = self._convert_to_command(transcript)
+                final_result = self._process_feedback(feedback)
+                if final_result:
+                    break
 
 if __name__ == '__main__':
-    start()
+    SpeechProcessing().stream_and_listen()
