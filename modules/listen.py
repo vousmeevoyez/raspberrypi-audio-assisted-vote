@@ -8,15 +8,16 @@ from __future__ import division
 import os
 import re
 import sys
+import six
+
+from six.moves import queue
+from ctypes import *
+from contextlib import contextmanager
 
 from google.cloud import speech
 from google.cloud.speech import enums
 from google.cloud.speech import types
 import pyaudio
-from six.moves import queue
-
-from ctypes import *
-from contextlib import contextmanager
 
 from config import *
 
@@ -197,7 +198,7 @@ class SpeechProcessing:
 
         command = ""
         while command != "exit":
-            command = input("enter command ")
+            command = six.moves.input("enter command ")
             with MicrophoneStream(RATE, CHUNK) as stream:
                 audio_generator = stream.generator()
                 requests = (types.StreamingRecognizeRequest(audio_content=content)
