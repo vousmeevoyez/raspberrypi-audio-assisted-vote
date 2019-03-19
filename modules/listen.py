@@ -120,9 +120,9 @@ class SpeechProcessing:
             for result in response.results:
                 for alternative in result.alternatives:
                     if result.is_final:
-                        finalize_transcript = result.alternative.transcript
-                        # stop
+                        finalize_transcript = result.alternatives[0].transcript
                         break
+                        # stop
                     #end if
                 else:
                     continue
@@ -179,11 +179,10 @@ class SpeechProcessing:
     @staticmethod
     def _process_feedback(command):
         # process the feedback
-        if command["result"] == "RECOGNIZED":
+        if command["status"] == "RECOGNIZED":
             text_to_speech(command["feedback"])
         else:
             text_to_speech(command["feedback"])
-        return True
 
     def stream_and_listen(self):
         """
@@ -215,10 +214,12 @@ class SpeechProcessing:
 
                 responses = client.streaming_recognize(streaming_config, requests)
                 transcript = self._convert_to_transcript(responses)
+                print(transcript)
                 feedback = self._convert_to_command(transcript)
+                print(feedback)
                 final_result = self._process_feedback(feedback)
-                if final_result:
-                    break
+                stream.closed = True
+            print("test....")
 
 if __name__ == '__main__':
     SpeechProcessing().stream_and_listen()

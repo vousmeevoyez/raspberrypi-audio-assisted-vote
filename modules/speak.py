@@ -1,12 +1,19 @@
 """
     Text To Speech
 """
-import os
 import time
+from subprocess import call
 from config import *
 
 def text_to_speech(text):
     """
         wrapper function to execute espeak command in shell via python
     """
-    os.system('espeak -vid+f1 -k5 -s200"{}"'.format(str(text)))
+    call(["espeak","-vid+f5", "-k5", "-s150", text])
+
+'''
+if __name__ == "__main__":
+    text_to_speech("Hallo kelvin")
+    text_to_speech("untuk dapat ke tahap selanjutnya silahkan katakan tampilkan\
+                kandida")
+'''
