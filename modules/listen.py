@@ -121,7 +121,8 @@ class SpeechProcessing:
                 for alternative in result.alternatives:
                     transcript = alternative.transcript
                     if result.is_final:
-                        finalize_transcript = result.alternatives.transcript
+                        finalize_transcript = result.alternatives[0].transcript
+                        print(finalize_transcript)
                         # stop
                         break
                     #end if
