@@ -9,7 +9,7 @@ def text_to_speech(text):
     """
         wrapper function to execute espeak command in shell via python
     """
-    os.system('espeak -vid+f1 -k5 -s150 "{}"'.format(str(text)))
+    os.system('espeak -vid+f1 -k5 -s200"{}"'.format(str(text)))
 
 def greet_login(username):
     """

@@ -118,7 +118,10 @@ def listen_result(responses):
         if result.is_final:
             print(transcript)
             # check command for further processing
-            check_command(transcript)
+            result = check_command(transcript)
+            # command is not recognized throw an error here
+            if result is False:
+                text_to_speech(SPEECH_RESPONSE["UNKNOWN"])
 
 def check_command(transcript):
     # match first word with all registered command
@@ -128,7 +131,7 @@ def check_command(transcript):
         try:
             command, username = transcript.split(" ")
         except ValueError:
-            text_to_speech(SPEECH_RESPONSE["UNKNOWN"])
+            return False
         #end try
         access_token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
         print(access_token)
