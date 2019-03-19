@@ -164,6 +164,7 @@ def start():
     # initialize streaming config
     streaming_config = types.StreamingRecognitionConfig(
         config=config,
+        single_utterance=True,
         interim_results=True)
 
     with MicrophoneStream(RATE, CHUNK) as stream:
