@@ -117,13 +117,16 @@ class SpeechProcessing:
         """ convert cloud speech response to final transcript """
         finalize_transcript = ""
         for response in responses:
-            results = response.results
-            for result in results:
-                if result.is_final:
-                    finalize_transcript = result.alternatives.transcript
-                    # stop
-                    break
-                #end if
+            for result in response.results:
+                for alternative in result.alternatives:
+                    transcript = alternative.transcript
+                    if result.is_final:
+                        finalize_transcript = result.alternatives.transcript
+                        # stop
+                        break
+                    #end if
+                #end for
+            #end for
         #end for
         return finalize_transcript
 
