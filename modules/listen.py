@@ -119,9 +119,8 @@ class SpeechProcessing:
         for response in responses:
             results = response.results
             for result in results:
-                print(result)
                 if result.is_final:
-                    finalize_transcript = result.transcript
+                    finalize_transcript = result.alternatives.transcript
                     # stop
                     break
                 #end if
