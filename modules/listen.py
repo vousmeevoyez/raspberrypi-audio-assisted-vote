@@ -120,8 +120,8 @@ class SpeechProcessing:
             results = response.results
             for result in results:
                 print(result)
-                if response.is_final:
-                    finalize_transcript = transcript
+                if result.is_final:
+                    finalize_transcript = result.transcript
                     # stop
                     break
                 #end if
