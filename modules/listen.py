@@ -119,14 +119,18 @@ class SpeechProcessing:
         for response in responses:
             for result in response.results:
                 for alternative in result.alternatives:
-                    transcript = alternative.transcript
                     if result.is_final:
-                        finalize_transcript = result.alternatives[0].transcript
-                        print(finalize_transcript)
+                        finalize_transcript = result.alternative.transcript
                         # stop
                         break
                     #end if
+                else:
+                    continue
+                break
                 #end for
+            else:
+                continue
+            break
             #end for
         #end for
         return finalize_transcript
