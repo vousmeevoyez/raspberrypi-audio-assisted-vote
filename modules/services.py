@@ -17,7 +17,8 @@ class VoteServices:
 
     def __init__(self, username=None, password=None, token=None):
         if username and password:
-            self._token = self.get_token(username, password)
+            token, username = self.get_token(username, password)
+            self.token = token
         else:
             self._token = token
 
@@ -75,7 +76,6 @@ class VoteServices:
         #end try
         name = response["data"]["user"]["name"]
         access_token = response["data"]["access_token"]
-        print(access_token)
         # trim information here so it only return access token and user name
         return access_token, name
 
