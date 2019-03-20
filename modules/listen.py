@@ -157,12 +157,13 @@ class SpeechProcessing:
             try:
                 username = value
                 access_token, user_name = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+                # should access token here
+                print(access_token)
+                print(user_name)
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
 
-            # should access token here
-            print(access_token)
             # first greet user
             sentences.append(user_name)
             # second return insturction to continue
