@@ -154,21 +154,19 @@ class SpeechProcessing:
 
         # match first word with all registered command
         if re.search(r'\masuk|login\b', transcript, re.I):
-            username = value
             try:
+                username = value
                 access_token, user_name = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
                 # should access token here
                 print(access_token)
                 print(user_name)
+                # first greet user
+                sentences.append(user_name)
+                # second return insturction to continue
+                sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user_name))
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
-
-            # first greet user
-            sentences.append(user_name)
-            # second return insturction to continue
-            sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user_name))
-
         elif re.search(r'\b(tampilkan)\b', transcript, re.I):
             candidates = \
             VoteServices().get_candidates(os.environ.get("ELECTION_ID"))
