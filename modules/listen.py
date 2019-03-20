@@ -185,10 +185,18 @@ class SpeechProcessing:
                 sentences.append(error.message)
             #end try
         elif re.search(r'\b(pilih)\b', transcript, re.I):
+            # first make sure value is integer not word
+            order_no = None
+
             try:
-                order_no = value
+                order_no = int(value)
+            except ValueError:
+                order_no = self._convert_word_to_number(value)
+            #end try
+
+            try:
                 # convert order no to candidate_id
-                candidate_id = self._order_no_to_candidate_id(order_no)
+                candidate_id = self._order_no_to_candidate_id(str(order_no))
                 response = VoteServices(token=self._token).cast_vote(candidate_id)
                 sentences.append(SPEECH_RESPONSE["THIRD_STEP"])
             except ResponseError as error:
@@ -218,6 +226,29 @@ class SpeechProcessing:
                 break
 
         return candidate_id
+
+    @staticmethod
+    def _convert_word_to_number(word):
+        known_number = ["nol", "satu", "dua", "tiga", "empat", "lima", "enam",
+                        "tujuh", "delapan", "sembilan", "sepuluh"]
+        value = {
+            "nol"      : 0,
+            "satu"     : 1,
+            "dua"      : 2,
+            "tiga"     : 3,
+            "empat"    : 4,
+            "lima"     : 5,
+            "enam"     : 6,
+            "tujuh"    : 7,
+            "delapan"  : 8,
+            "sembilan" : 9,
+            "sepuluh"  : 10
+        }
+        if word not in known_number:
+            raise ValueError
+
+        return value[word]
+
 
     def stream_and_listen(self):
         """
