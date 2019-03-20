@@ -19,7 +19,7 @@ from google.cloud.speech import enums
 from google.cloud.speech import types
 import pyaudio
 # configuration
-from config import *
+from modules.config import *
 # services
 from services import *
 # speak utility

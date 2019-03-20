@@ -6,7 +6,7 @@
 import requests
 import json
 
-from config import *
+from modules.config import *
 
 class ResponseError(Exception):
     """ class raised when services error happen"""
