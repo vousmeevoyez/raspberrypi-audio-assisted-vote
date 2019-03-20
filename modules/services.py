@@ -18,7 +18,7 @@ class VoteServices:
     def __init__(self, username=None, password=None, token=None):
         if username and password:
             token, username = self.get_token(username, password)
-            self.token = token
+            self._token = token
         else:
             self._token = token
 
