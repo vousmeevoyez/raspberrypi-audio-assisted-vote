@@ -167,8 +167,6 @@ class SpeechProcessing:
             sentences.append(user_name)
             # second return insturction to continue
             sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user_name))
-            # set sentences as feedback
-            response["feedback"] = sentences
 
         elif re.search(r'\b(tampilkan)\b', transcript, re.I):
             candidates = \
@@ -184,8 +182,10 @@ class SpeechProcessing:
             print('Exiting..')
         else:
             response["status"] = "UNKNOWN"
-            response["feedback"] = SPEECH_RESPONSE["UNKNOWN"]
+            sentences.append(SPEECH_RESPONSE["UNKNOWN"])
 
+        # append result
+        response["feedback"] = sentences
         return response
 
     @staticmethod
