@@ -54,6 +54,8 @@ class VoteServices:
 
         if response.ok:
             response = response.json()
+        else:
+            raise ResponseError(response.json()["error"])
 
         return response
 
@@ -63,16 +65,16 @@ class VoteServices:
             "username" : username,
             "password" : password
         }
-        response = self.remote_call(routes, payload)
-        # check error first
-        if 'error' in response:
-            if response["error"] == "USER_NOT_FOUND":
+        try:
+            response = self.remote_call(routes, payload)
+        except ResponseError as error:
+            if error.message == "USER_NOT_FOUND":
                 message = "Pengguna tidak ditemukan"
-                raise ResponseError(message)
-        else:
-            name = response["data"]["user"]["name"]
-            access_token = response["data"]["access_token"]
-            # trim information here so it only return access token and user name
+            raise ResponseError(message)
+        #end try
+        name = response["data"]["user"]["name"]
+        access_token = response["data"]["access_token"]
+        # trim information here so it only return access token and user name
         return access_token, name
 
     def get_candidates(self, election_id):
