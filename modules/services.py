@@ -55,8 +55,8 @@ class VoteServices:
         if response.ok:
             response = response.json()
         else:
+            print(response.json())
             raise ResponseError(response.json()["error"])
-
         return response
 
     def get_token(self, username, password):
