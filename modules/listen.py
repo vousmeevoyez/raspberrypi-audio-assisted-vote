@@ -171,8 +171,10 @@ class SpeechProcessing:
             #end try
         elif re.search(r'\b(tampilkan)\b', transcript, re.I):
             try:
+                #authenticate as admin
                 sound_feedback, candidates = \
-                VoteServices(token=self._token).get_candidates(os.environ.get("ELECTION_ID"))
+                VoteServices(os.environ.get("DEFAULT_USERNAME"),
+                             os.environ.get("DEFAULT_PASSWORD")).get_candidates(os.environ.get("ELECTION_ID"))
                 # set sound feedbcak + instruction
                 sentences.append(sound_feedback)
                 sentences.append(SPEECH_RESPONSE["SECOND_STEP"])
