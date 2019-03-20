@@ -39,7 +39,9 @@ class VoteServices:
             headers = {}
 
         if payload is not None:
+            print(url)
             print(payload)
+            print(headers)
             response = requests.post(
                 url,
                 data=payload,
