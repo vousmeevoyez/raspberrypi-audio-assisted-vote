@@ -85,7 +85,7 @@ class VoteServices:
         sound_feedback = []
         candidates = []
         try:
-            response = self.remote_call(routes=routes, identifier=election_id)
+            response = self.remote_call(routes, None, election_id)
         except ResponseError as error:
             if error.message == "ELECTION_NOT_FOUND":
                 message = "Pemilihan tidak ditemukan"
