@@ -83,7 +83,6 @@ class VoteServices:
         candidates = []
         try:
             response = self.remote_call(routes=routes, identifier=election_id)
-            print(response)
         except ResponseError as error:
             if error.message == "ELECTION_NOT_FOUND":
                 message = "Pemilihan tidak ditemukan"
