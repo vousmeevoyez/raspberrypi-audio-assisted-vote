@@ -175,7 +175,9 @@ class SpeechProcessing:
                 VoteServices(os.environ.get("DEFAULT_USERNAME"),
                              os.environ.get("DEFAULT_PASSWORD")).get_candidates(os.environ.get("ELECTION_ID"))
                 # set sound feedbcak + instruction
-                sentences.append(sound_feedback)
+                for feedback in sound_feedback:
+                    sentences.append(sound_feedback)
+                #end for
                 sentences.append(SPEECH_RESPONSE["SECOND_STEP"])
                 # set candidates information so the function know the mapping
                 self._candidates = candidates
