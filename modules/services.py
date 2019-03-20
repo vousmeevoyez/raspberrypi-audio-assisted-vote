@@ -8,6 +8,11 @@ import json
 
 from config import *
 
+class ResponseError(Exception):
+    """ class raised when services error happen"""
+    def __init__(self, message):
+        self.message = message
+
 class VoteServices:
 
     def __init__(self, username=None, password=None, token=None):
@@ -59,8 +64,16 @@ class VoteServices:
             "password" : password
         }
         response = self.remote_call(routes, payload)
-        access_token = response["data"]["access_token"]
-        return access_token
+        # check error first
+        if response.has_key('error'):
+            if response["error"] == "USER_NOT_FOUND":
+                message = "Pengguna tidak ditemukan"
+            raise ResponseError(message)
+        else:
+            name = response["data"]["user"]["name"]
+            access_token = response["data"]["access_token"]
+            # trim information here so it only return access token and user name
+        return access_token, name
 
     def get_candidates(self, election_id):
         routes = "CANDIDATES"

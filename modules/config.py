@@ -19,7 +19,7 @@ ROUTES = {
 SPEECH_RESPONSE = {
     "UNKNOWN"    : "Perintah tidak dikenali, silahkan ulangi",
     "GREETING"   : "Halo {}",
-    "FIRST_STEP" : "untuk dapat ke tahap selanjutnya silahkan katakan tampilkan\
+    "FIRST_STEP" : "untuk ke tahap selanjutnya silahkan katakan tampilkan\
     kandidat",
     "SECOND_STEP": "Pilih kandidat dengan katakan pilih kandidat",
     "THIRD_SETP" : "Suara anda telah terekam, terima kasih"

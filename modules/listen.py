@@ -18,11 +18,10 @@ from google.cloud import speech
 from google.cloud.speech import enums
 from google.cloud.speech import types
 import pyaudio
-
+# configuration
 from config import *
-
 # services
-from services import VoteServices
+from services import *
 # speak utility
 from speak import *
 
@@ -145,25 +144,38 @@ class SpeechProcessing:
             "status"   : "RECOGNIZED",
             "feedback" : ""
         }
+        sentences = []
         # first split result into "command and value"
         try:
             command, value = transcript.split(" ")
         except ValueError:
             response["status"] = "UNKNOWN"
-            response["feedback"] = SPEECH_RESPONSE["UNKNOWN"]
+            sentences.append(SPEECH_RESPONSE["UNKNOWN"])
 
         # match first word with all registered command
         if re.search(r'\masuk|login\b', transcript, re.I):
-            username = value
-            access_token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+            try:
+                username = value
+                access_token, user_name = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+            except ResponseError as error:
+                sentences.append(error.message)
+            #end try
+
             # should access token here
             print(access_token)
-            # set feedback to login success
-            response["feedback"] = \
-            (SPEECH_RESPONSE["FIRST_STEP"]).format(username)
+            # first greet user
+            sentences.append(user_name)
+            # second return insturction to continue
+            sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user_name))
+            # set sentences as feedback
+            response["feedback"] = sentences
 
         elif re.search(r'\b(tampilkan)\b', transcript, re.I):
+            candidates = \
+            VoteServices().get_candidates(os.environ.get("ELECTION_ID"))
             print("Show candidate here")
+            response["feedback"] = \
+            (SPEECH_RESPONSE[""]).format(username)
 
         elif re.search(r'\b(pilih)\b', transcript, re.I):
             print("choose candidate here")
@@ -219,7 +231,6 @@ class SpeechProcessing:
                 print(feedback)
                 final_result = self._process_feedback(feedback)
                 stream.closed = True
-            print("test....")
 
 if __name__ == '__main__':
     SpeechProcessing().stream_and_listen()
