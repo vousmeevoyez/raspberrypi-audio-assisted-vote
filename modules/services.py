@@ -96,8 +96,8 @@ class VoteServices:
         for candidate in candidates:
             if candidate['order_no']:
                 sound_feedback.append(candidate['order_no'])
-            elif candidate['name']:
                 sound_feedback.append(candidate['name'])
+            else:
                 candidate.append({
                     "id" : candidate['id'],
                     "order_no" : candidate['order_no']
