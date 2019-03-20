@@ -152,8 +152,7 @@ class SpeechProcessing:
         try:
             command, value = transcript.split(" ")
         except ValueError:
-            response["status"] = "UNKNOWN"
-            sentences.append(SPEECH_RESPONSE["UNKNOWN"])
+            pass
 
         # match first word with all registered command
         if re.search(r'\masuk|login\b', transcript, re.I):
