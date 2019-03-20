@@ -33,15 +33,13 @@ class VoteServices:
         # set token only if its not login
         if routes != "LOGIN":
             headers = {
-                "Authorization" : "Bearer {}".format(self._token)
+                "Authorization" : "Bearer {}".format(self._token),
+                "Content-Type" : "application/json"
             }
         else:
             headers = {}
 
         if payload is not None:
-            print(url)
-            print(payload)
-            print(headers)
             response = requests.post(
                 url,
                 data=payload,
@@ -85,7 +83,7 @@ class VoteServices:
         sound_feedback = []
         candidates = []
         try:
-            response = self.remote_call(routes, None, election_id)
+            response = self.remote_call(routes=routes, identifier=election_id)
         except ResponseError as error:
             if error.message == "ELECTION_NOT_FOUND":
                 message = "Pemilihan tidak ditemukan"
