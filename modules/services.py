@@ -65,7 +65,7 @@ class VoteServices:
         }
         response = self.remote_call(routes, payload)
         # check error first
-        if response.has_key('error'):
+        if 'error' in response:
             if response["error"] == "USER_NOT_FOUND":
                 message = "Pengguna tidak ditemukan"
             raise ResponseError(message)
