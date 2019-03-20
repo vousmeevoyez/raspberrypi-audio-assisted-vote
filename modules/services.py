@@ -68,7 +68,7 @@ class VoteServices:
         if 'error' in response:
             if response["error"] == "USER_NOT_FOUND":
                 message = "Pengguna tidak ditemukan"
-            raise ResponseError(message)
+                raise ResponseError(message)
         else:
             name = response["data"]["user"]["name"]
             access_token = response["data"]["access_token"]
