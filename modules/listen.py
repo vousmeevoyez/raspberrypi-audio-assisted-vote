@@ -180,6 +180,7 @@ class SpeechProcessing:
                 #end for
                 sentences.append(SPEECH_RESPONSE["SECOND_STEP"])
                 # set candidates information so the function know the mapping
+                print(candidates)
                 self._candidates = candidates
             except ResponseError as error:
                 sentences.append(error.message)
