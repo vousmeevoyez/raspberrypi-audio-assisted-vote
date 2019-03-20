@@ -111,6 +111,10 @@ class MicrophoneStream:
 class SpeechProcessing:
     """ processing all the speech here"""
 
+    def __init__(self):
+        self._token = None
+        self._candidates = []
+
     @staticmethod
     def _convert_to_transcript(responses):
         """ convert cloud speech response to final transcript """
@@ -134,8 +138,7 @@ class SpeechProcessing:
         #end for
         return finalize_transcript
 
-    @staticmethod
-    def _convert_to_command(transcript):
+    def _convert_to_command(self, transcript):
         """
             match transcript to known command
             if its known executed it and if its not return an error
@@ -157,28 +160,37 @@ class SpeechProcessing:
             try:
                 username = value
                 access_token, user_name = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
-                # should access token here
-                print(access_token)
-                print(user_name)
                 # first greet user
                 sentences.append(user_name)
                 # second return insturction to continue
                 sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user_name))
+                # dont forget set token here
+                self._token = access_token
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
         elif re.search(r'\b(tampilkan)\b', transcript, re.I):
-            candidates = \
-            VoteServices().get_candidates(os.environ.get("ELECTION_ID"))
-            print("Show candidate here")
-            response["feedback"] = \
-            (SPEECH_RESPONSE[""]).format(username)
-
+            try:
+                sound_feedback, candidates = \
+                VoteServices(token=self._token).get_candidates(os.environ.get("ELECTION_ID"))
+                # set sound feedbcak + instruction
+                sentences.append(sound_feedback)
+                sentences.append(SPEECH_RESPONSE["SECOND_STEP"])
+                # set candidates information so the function know the mapping
+                self._candidates = candidates
+            except ResponseError as error:
+                sentences.append(error.message)
+            #end try
         elif re.search(r'\b(pilih)\b', transcript, re.I):
-            print("choose candidate here")
-
-        elif re.search(r'\b(keluar|berhenti)\b', transcript, re.I):
-            print('Exiting..')
+            try:
+                order_no = value
+                # convert order no to candidate_id
+                candidate_id = self._order_no_to_candidate_id(order_no)
+                response = VoteServices(token=self._token).cast_vote(candidate_id)
+                sentences.append(SPEECH_RESPONSE["THIRD_STEP"])
+            except ResponseError as error:
+                sentences.append(error.message)
+            #end try
         else:
             response["status"] = "UNKNOWN"
             sentences.append(SPEECH_RESPONSE["UNKNOWN"])
@@ -194,6 +206,15 @@ class SpeechProcessing:
             text_to_speech(command["feedback"])
         else:
             text_to_speech(command["feedback"])
+
+    def _order_no_to_candidate_id(self, order_no):
+        candidate_id = None
+        for candidate in self._candidates:
+            if candidate[order_no]:
+                candidate_id = candidate['candidate_id']
+                break
+
+        return candidate_id
 
     def stream_and_listen(self):
         """

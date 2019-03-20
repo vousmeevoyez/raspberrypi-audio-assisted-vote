@@ -79,10 +79,35 @@ class VoteServices:
 
     def get_candidates(self, election_id):
         routes = "CANDIDATES"
-        response = self.remote_call(routes, None, election_id)
-        return response
+        sound_feedback = []
+        candidates = []
+        try:
+            response = self.remote_call(routes, None, election_id)
+        except ResponseError as error:
+            if error.message == "ELECTION_NOT_FOUND":
+                message = "Pemilihan tidak ditemukan"
+            raise ResponseError(message)
+        #end try
+        # trim response
+        candidates = response["data"]
+        # build list for sound feedback order
+        for candidate in candidates:
+            if candidate['order_no']:
+                sound_feedback.append(candidate['order_no'])
+            elif candidate['name']:
+                sound_feedback.append(candidate['name'])
+                candidate.append({
+                    "id" : candidate['id'],
+                    "order_no" : candidate['order_no']
+                })
+
+        return sound_feedback, candidates
 
     def cast_vote(self, candidate_id):
         routes = "VOTE"
-        response = self.remote_call(routes, {}, candidate_id)
+        try:
+            response = self.remote_call(routes, {}, candidate_id)
+        except ResponseError as error:
+            raise ResponseError(error.message)
+        #end try
         return response
