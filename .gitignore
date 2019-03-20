@@ -113,3 +113,5 @@ dmypy.json
 *.swp
 .DS_Store
 
+# hide init
+init.sh
