@@ -154,8 +154,8 @@ class SpeechProcessing:
 
         # match first word with all registered command
         if re.search(r'\masuk|login\b', transcript, re.I):
+            username = value
             try:
-                username = value
                 access_token, user_name = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
                 # should access token here
                 print(access_token)
