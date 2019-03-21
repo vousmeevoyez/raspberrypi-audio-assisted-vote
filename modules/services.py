@@ -6,7 +6,7 @@
 import requests
 import json
 
-from modules.config import *
+from config import *
 
 class ResponseError(Exception):
     """ class raised when services error happen"""
@@ -82,7 +82,7 @@ class VoteServices:
     def get_candidates(self, election_id):
         routes = "CANDIDATES"
         sound_feedback = []
-        candidates = []
+        trimmed_candidates = []
         try:
             response = self.remote_call(routes=routes, identifier=election_id)
         except ResponseError as error:
@@ -97,13 +97,13 @@ class VoteServices:
             if candidate['order_no']:
                 sound_feedback.append(candidate['order_no'])
                 sound_feedback.append(candidate['name'])
-            else:
-                candidate.append({
-                    "id" : candidate['id'],
-                    "order_no" : candidate['order_no']
-                })
 
-        return sound_feedback, candidates
+            trimmed_candidates.append({
+                "id" : candidate['id'],
+                "order_no" : candidate['order_no']
+            })
+
+        return sound_feedback, trimmed_candidates
 
     def cast_vote(self, candidate_id):
         routes = "VOTE"
