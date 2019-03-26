@@ -179,7 +179,7 @@ class SpeechProcessing:
         return value[word]
 
 
-    def listen_callback(self):
+    def listen_callback(self, channel):
         """
             start listening microphone and initialize stream to google
         """
