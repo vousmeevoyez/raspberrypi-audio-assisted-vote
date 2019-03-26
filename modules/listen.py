@@ -183,8 +183,6 @@ class SpeechProcessing:
         """
             start listening microphone and initialize stream to google
         """
-        print("button was pressed")
-
         # start speech client
         client = speech.SpeechClient()
         # initialize recogition config
@@ -201,29 +199,27 @@ class SpeechProcessing:
             single_utterance=True,
             interim_results=True)
 
-        with MicrophoneStream(RATE, CHUNK) as stream:
-            audio_generator = stream.generator()
-            requests = (types.StreamingRecognizeRequest(audio_content=content)
-                        for content in audio_generator)
+        while True:
+            if GPIO.input(self.button_pin) == GPIO.HIGH:
+                with MicrophoneStream(RATE, CHUNK) as stream:
+                    audio_generator = stream.generator()
+                    requests = (types.StreamingRecognizeRequest(audio_content=content)
+                                for content in audio_generator)
 
-            responses = client.streaming_recognize(streaming_config, requests)
-            print(responses)
-            transcript = self._convert_to_transcript(responses)
-            print(transcript)
-            feedback = self._convert_to_command(transcript)
-            print(feedback)
-            final_result = self._process_feedback(feedback)
-            stream.closed = True
+                    responses = client.streaming_recognize(streaming_config, requests)
+                    print(responses)
+                    transcript = self._convert_to_transcript(responses)
+                    print(transcript)
+                    feedback = self._convert_to_command(transcript)
+                    print(feedback)
+                    final_result = self._process_feedback(feedback)
+                    stream.closed = True
 
-    def start(self):
+    def init_gpio(self):
         """ init GPIO and set callback event """
         GPIO.setwarnings(False) # Ignore warning for now
         GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
         GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 2 to be an input pin and set initial value to be pulled low (off)
-        GPIO.add_event_detect(self.button_pin, GPIO.RISING,
-                              callback=self.listen_callback) # Setup event on pin 10 rising edge
-        message = input("Press enter to quit") # Run until someone presses enter
-        GPIO.cleanup()
 
 if __name__ == '__main__':
     SpeechProcessing().start()
