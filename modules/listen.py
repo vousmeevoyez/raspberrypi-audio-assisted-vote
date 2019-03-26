@@ -35,6 +35,10 @@ class SpeechProcessing:
         self._token = None
         self._candidates = []
 
+        GPIO.setwarnings(False) # Ignore warning for now
+        GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
+        GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 2 to be an input pin and set initial value to be pulled low (off)
+
     @staticmethod
     def _convert_to_transcript(responses):
         """ convert cloud speech response to final transcript """
@@ -179,7 +183,7 @@ class SpeechProcessing:
         return value[word]
 
 
-    def listen_callback(self, channel):
+    def stream_listen(self):
         """
             start listening microphone and initialize stream to google
         """
@@ -215,11 +219,5 @@ class SpeechProcessing:
                     final_result = self._process_feedback(feedback)
                     stream.closed = True
 
-    def init_gpio(self):
-        """ init GPIO and set callback event """
-        GPIO.setwarnings(False) # Ignore warning for now
-        GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
-        GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 2 to be an input pin and set initial value to be pulled low (off)
-
 if __name__ == '__main__':
-    SpeechProcessing().start()
+    SpeechProcessing().stream_listen()
