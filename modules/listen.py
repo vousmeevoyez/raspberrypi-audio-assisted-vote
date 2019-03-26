@@ -8,6 +8,8 @@ import re
 import sys
 import six
 
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+
 from six.moves import queue
 from ctypes import *
 from contextlib import contextmanager
@@ -26,6 +28,8 @@ from speak import *
 
 class SpeechProcessing:
     """ processing all the speech here"""
+
+    button_pin = 3
 
     def __init__(self):
         self._token = None
@@ -127,7 +131,7 @@ class SpeechProcessing:
             #end try
         else:
             response["status"] = "UNKNOWN"
-            sentences.append(speech_response["UNKNOWN"])
+            sentences.append(SPEECH_RESPONSE["UNKNOWN"])
 
         # append result
         response["feedback"] = sentences
@@ -143,6 +147,7 @@ class SpeechProcessing:
 
     @staticmethod
     def _order_no_to_candidate_id(candidates, order_no):
+        """ convert ord no to candidate id"""
         candidate_id = None
         for candidate in candidates:
             if candidate['order_no'] == str(order_no):
@@ -174,10 +179,12 @@ class SpeechProcessing:
         return value[word]
 
 
-    def stream_and_listen(self):
+    def listen_callback(self):
         """
             start listening microphone and initialize stream to google
         """
+        print("button was pressed")
+
         # start speech client
         client = speech.SpeechClient()
         # initialize recogition config
@@ -194,22 +201,28 @@ class SpeechProcessing:
             single_utterance=True,
             interim_results=True)
 
-        command = ""
-        while command != "exit":
-            command = six.moves.input("enter command ")
-            with MicrophoneStream(RATE, CHUNK) as stream:
-                audio_generator = stream.generator()
-                requests = (types.StreamingRecognizeRequest(audio_content=content)
-                            for content in audio_generator)
+        with MicrophoneStream(RATE, CHUNK) as stream:
+            audio_generator = stream.generator()
+            requests = (types.StreamingRecognizeRequest(audio_content=content)
+                        for content in audio_generator)
 
-                responses = client.streaming_recognize(streaming_config, requests)
-                print(responses)
-                transcript = self._convert_to_transcript(responses)
-                print(transcript)
-                feedback = self._convert_to_command(transcript)
-                print(feedback)
-                final_result = self._process_feedback(feedback)
-                stream.closed = True
+            responses = client.streaming_recognize(streaming_config, requests)
+            print(responses)
+            transcript = self._convert_to_transcript(responses)
+            print(transcript)
+            feedback = self._convert_to_command(transcript)
+            print(feedback)
+            final_result = self._process_feedback(feedback)
+            stream.closed = True
+
+    def start(self):
+        """ init GPIO and set callback event """
+        GPIO.setwarnings(False) # Ignore warning for now
+        GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
+        GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 2 to be an input pin and set initial value to be pulled low (off)
+        GPIO.add_event_detect(self.button_pin, GPIO.RISING,
+                              callback=self.listen_callback) # Setup event on pin 10 rising edge
 
 if __name__ == '__main__':
-    SpeechProcessing().stream_and_listen()
+    SpeechProcessing().start()
+    GPIO.cleanup()
