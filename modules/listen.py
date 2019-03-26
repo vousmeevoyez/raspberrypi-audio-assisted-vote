@@ -90,7 +90,7 @@ class SpeechProcessing:
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
-        elif re.search(r'\b(tampilkan)\b', transcript, re.I):
+        elif re.search(r'\btampilkan\b', transcript, re.I):
             try:
                 #authenticate as admin
                 sound_feedback, candidates = \
@@ -107,7 +107,7 @@ class SpeechProcessing:
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
-        elif re.search(r'\b(pilih)\b', transcript, re.I):
+        elif re.search(r'\bpilih\b', transcript, re.I):
             # first make sure value is integer not word
             order_no = None
 
@@ -118,18 +118,15 @@ class SpeechProcessing:
             #end try
 
             try:
-                print(order_no)
                 # convert order no to candidate_id
-                print(self._candidates)
                 candidate_id = self._order_no_to_candidate_id(self._candidates, order_no)
-                print(candidate_id)
                 response = VoteServices(token=self._token).cast_vote(candidate_id)
                 sentences.append(SPEECH_RESPONSE["THIRD_STEP"])
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
         else:
-            response["status"] = "unknown"
+            response["status"] = "UNKNOWN"
             sentences.append(speech_response["UNKNOWN"])
 
         # append result
