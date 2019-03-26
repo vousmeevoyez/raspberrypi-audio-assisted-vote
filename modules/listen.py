@@ -72,7 +72,7 @@ class SpeechProcessing:
         try:
             count = len(transcript.split(" "))
             if count < 2:
-                response["status"] = "unknown"
+                response["status"] = "UNKNOWN"
                 sentences.append("Perintah terlalu pendek")
                 return response
 
@@ -222,7 +222,8 @@ class SpeechProcessing:
         GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 2 to be an input pin and set initial value to be pulled low (off)
         GPIO.add_event_detect(self.button_pin, GPIO.RISING,
                               callback=self.listen_callback) # Setup event on pin 10 rising edge
-        message = input("Press enter to quit\n\n") # Run until someone presses enter
+        message = input("Press enter to quit") # Run until someone presses enter
+        GPIO.cleanup()
 
 if __name__ == '__main__':
     SpeechProcessing().start()
