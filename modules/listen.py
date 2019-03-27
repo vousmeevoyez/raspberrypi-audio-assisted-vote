@@ -38,6 +38,8 @@ class SpeechProcessing:
         GPIO.setwarnings(False) # Ignore warning for now
         GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
         GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 2 to be an input pin and set initial value to be pulled low (off)
+        GPIO.add_event_detect(self.button_pin, GPIO.RISING,
+                              callback=self.listen)
 
     @staticmethod
     def _convert_to_transcript(responses):
@@ -79,10 +81,11 @@ class SpeechProcessing:
                 response["status"] = "UNKNOWN"
                 sentences.append("Perintah terlalu pendek")
                 return response
-
+            #end if
             command, value = transcript.split(" ")
         except ValueError:
             pass
+        #end try
 
         # match first word with all registered command
         if re.search(r'\masuk|login\b', transcript, re.I):
@@ -157,7 +160,8 @@ class SpeechProcessing:
             if candidate['order_no'] == str(order_no):
                 candidate_id = candidate['id']
                 break
-
+            #end if
+        #end for
         return candidate_id
 
     @staticmethod
@@ -179,11 +183,11 @@ class SpeechProcessing:
         }
         if word not in known_number:
             raise ValueError
-
+        #end if
         return value[word]
 
 
-    def stream_listen(self):
+    def listen(self):
         """
             start listening microphone and initialize stream to google
         """
@@ -203,21 +207,23 @@ class SpeechProcessing:
             single_utterance=True,
             interim_results=True)
 
-        while True:
-            if GPIO.input(self.button_pin) == GPIO.HIGH:
-                with MicrophoneStream(RATE, CHUNK) as stream:
-                    audio_generator = stream.generator()
-                    requests = (types.StreamingRecognizeRequest(audio_content=content)
-                                for content in audio_generator)
+        with MicrophoneStream(RATE, CHUNK) as stream:
+            audio_generator = stream.generator()
+            requests = (types.StreamingRecognizeRequest(audio_content=content)
+                        for content in audio_generator)
 
-                    responses = client.streaming_recognize(streaming_config, requests)
-                    print(responses)
-                    transcript = self._convert_to_transcript(responses)
-                    print(transcript)
-                    feedback = self._convert_to_command(transcript)
-                    print(feedback)
-                    final_result = self._process_feedback(feedback)
-                    stream.closed = True
+            responses = client.streaming_recognize(streaming_config, requests)
+            print(responses)
+            transcript = self._convert_to_transcript(responses)
+            print(transcript)
+            feedback = self._convert_to_command(transcript)
+            print(feedback)
+            final_result = self._process_feedback(feedback)
+            stream.closed = True
+
+    def start(self):
+        message = input("press enter to quit")
+        GPIO.cleanup()
 
 if __name__ == '__main__':
-    SpeechProcessing().stream_listen()
+    SpeechProcessing().start()
