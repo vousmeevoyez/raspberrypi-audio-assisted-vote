@@ -187,7 +187,7 @@ class SpeechProcessing:
         return value[word]
 
 
-    def listen(self):
+    def listen(self, channel):
         """
             start listening microphone and initialize stream to google
         """
