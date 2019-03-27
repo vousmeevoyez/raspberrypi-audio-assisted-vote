@@ -21,6 +21,6 @@ SPEECH_RESPONSE = {
     "GREETING"   : "Halo {}",
     "FIRST_STEP" : "untuk ke tahap selanjutnya silahkan katakan tampilkan\
     kandidat",
-    "SECOND_STEP": "Pilih kandidat dengan katakan pilih kandidat",
+    "SECOND_STEP": "Pilih kandidat dengan katakan pilih nomor kandidat",
     "THIRD_STEP" : "Suara anda telah terekam, terima kasih"
 }
