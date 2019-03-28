@@ -140,7 +140,7 @@ class SpeechProcessing:
         else:
             response["status"] = "UNKNOWN"
             sentences.append(SPEECH_RESPONSE["UNKNOWN"])
-
+        #end if
         # append result
         response["feedback"] = sentences
         return response
