@@ -4,11 +4,12 @@
 import requests
 import unittest
 try:
-            from unittest.mock import MagicMock
+            from unittest.mock import patch, mock
 except ImportError:
-            from mock import MagicMock
+            from mock import patch
 
 from modules.listen import SpeechProcessing
+from modules.services import VoteServices
 
 class TestMockSpeechProcessing(unittest.TestCase):
 
@@ -43,11 +44,55 @@ class TestMockSpeechProcessing(unittest.TestCase):
     def test_order_no_to_candidate_id(self):
         candidates = [{
             "order_no" : "1",
-            "candidate_id" : "asdjasldjlaksjldkjalsjdlsja"
+            "id" : "asdjasldjlaksjldkjalsjdlsja"
         },
         {
             "order_no" : "2",
-            "candidate_id" : "asdjlaksjldkjalsjdlsja"
+            "id" : "asdjlaksjldkjalsjdlsja"
         }]
         result = SpeechProcessing._order_no_to_candidate_id(candidates, "2")
         self.assertEqual(result, "asdjlaksjldkjalsjdlsja")
+
+    @patch.object(VoteServices, "get_token")
+    def test_convert_to_command_get_token(self, mock_vote_services):
+        result = SpeechProcessing()._convert_to_command("hallo kelvin")
+        self.assertEqual(result['status'], "UNKNOWN")
+        self.assertTrue(result['feedback'])
+
+        result = SpeechProcessing()._convert_to_command("hallo")
+        self.assertEqual(result['status'], "UNKNOWN")
+        self.assertTrue(result['feedback'])
+
+        mock_vote_services.return_value = "username", "some_token"
+        result = SpeechProcessing()._convert_to_command("masuk 1")
+        self.assertEqual(result['status'], "RECOGNIZED")
+        self.assertTrue(result['feedback'])
+
+    @patch.object(VoteServices, "get_candidates")
+    def test_convert_to_command_get_candidates(self, mock_vote_services):
+        dummy_sound_feedback = [ "1", "candidate 1", "2" ,"candidate 2"]
+        dummy_candidates= [{
+            "order_no" : "1",
+            "id" : "asdjasldjlaksjldkjalsjdlsja"
+        },
+        {
+            "order_no" : "2",
+            "id" : "asdjlaksjldkjalsjdlsja"
+        }]
+
+        mock_vote_services.return_value = dummy_sound_feedback, dummy_candidates
+
+        result = SpeechProcessing()._convert_to_command("tampilkan kandidat")
+        self.assertEqual(result['status'], "RECOGNIZED")
+        self.assertTrue(result['feedback'])
+
+    @patch.object(VoteServices, "cast_vote")
+    def test_convert_to_command_get_candidates(self, mock_vote_services):
+        mock_vote_services.return_value = {
+                "data" : "some services"
+        }
+
+        result = SpeechProcessing()._convert_to_command("pilih 1")
+        print(result)
+        self.assertEqual(result['status'], "RECOGNIZED")
+        self.assertTrue(result['feedback'])

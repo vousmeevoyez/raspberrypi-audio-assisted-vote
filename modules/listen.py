@@ -80,11 +80,12 @@ class SpeechProcessing:
             if count < 2:
                 response["status"] = "UNKNOWN"
                 sentences.append("Perintah terlalu pendek")
+                response["feedback"] = sentences
                 return response
             #end if
             command, value = transcript.split(" ")
         except ValueError:
-            pass
+            sentences.append("Perintah terlalu pendek")
         #end try
 
         # match first word with all registered command
@@ -131,7 +132,7 @@ class SpeechProcessing:
             try:
                 # convert order no to candidate_id
                 candidate_id = self._order_no_to_candidate_id(self._candidates, order_no)
-                response = VoteServices(token=self._token).cast_vote(candidate_id)
+                services_status = VoteServices(token=self._token).cast_vote(candidate_id)
                 sentences.append(SPEECH_RESPONSE["THIRD_STEP"])
             except ResponseError as error:
                 sentences.append(error.message)
