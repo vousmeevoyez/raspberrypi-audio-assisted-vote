@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import six
+import logging
 
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 
@@ -25,6 +26,10 @@ from config import *
 from services import *
 # speak utility
 from speak import *
+
+logging.basicConfig(level=logging.INFO, filename="app.log",
+                    filemode="w", format='%(asctime)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
 
 class SpeechProcessing:
     """ processing all the speech here"""
@@ -116,7 +121,6 @@ class SpeechProcessing:
                 #end for
                 sentences.append(SPEECH_RESPONSE["SECOND_STEP"])
                 # set candidates information so the function know the mapping
-                print(candidates)
                 self._candidates = candidates
             except ResponseError as error:
                 sentences.append(error.message)
@@ -216,11 +220,11 @@ class SpeechProcessing:
                         for content in audio_generator)
 
             responses = client.streaming_recognize(streaming_config, requests)
-            print(responses)
             transcript = self._convert_to_transcript(responses)
             print(transcript)
+            logging.info(transcript)
             feedback = self._convert_to_command(transcript)
-            print(feedback)
+            logging.info(feedback)
             final_result = self._process_feedback(feedback)
             stream.closed = True
 
