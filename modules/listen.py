@@ -20,7 +20,7 @@ from google.cloud.speech import types
 
 from stream import MicrophoneStream
 # configuration
-from config import *
+from config.config import *
 # services
 from services import *
 # speak utility
@@ -91,13 +91,16 @@ class SpeechProcessing:
         if re.search(r'\masuk|login\b', transcript, re.I):
             try:
                 username = value
-                access_token, user_name = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+                # get access token
+                token = VoteServices().get_token(username, os.environ.get("DEFAULT_PASSWORD"))
+                # get user information
+                user = VoteServices(token).get_user()
                 # first greet user
-                sentences.append(user_name)
+                sentences.append(user.name)
                 # second return insturction to continue
-                sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user_name))
+                sentences.append(SPEECH_RESPONSE["FIRST_STEP"].format(user.name))
                 # dont forget set token here
-                self._token = access_token
+                self._token = token
             except ResponseError as error:
                 sentences.append(error.message)
             #end try
@@ -105,8 +108,7 @@ class SpeechProcessing:
             try:
                 #authenticate as admin
                 sound_feedback, candidates = \
-                VoteServices(os.environ.get("DEFAULT_USERNAME"),
-                             os.environ.get("DEFAULT_PASSWORD")).get_candidates(os.environ.get("ELECTION_ID"))
+                VoteServices(self._token).get_candidates()
                 # set sound feedbcak + instruction
                 for feedback in sound_feedback:
                     sentences.append(feedback)
@@ -131,7 +133,7 @@ class SpeechProcessing:
             try:
                 # convert order no to candidate_id
                 candidate_id = self._order_no_to_candidate_id(self._candidates, order_no)
-                response = VoteServices(token=self._token).cast_vote(candidate_id)
+                response = VoteServices(self._token).cast_vote(candidate_id)
                 sentences.append(SPEECH_RESPONSE["THIRD_STEP"])
             except ResponseError as error:
                 sentences.append(error.message)

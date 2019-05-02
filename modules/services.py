@@ -3,10 +3,18 @@
     ________________
     this is where we communicate with server
 """
-import requests
-import json
+import os
+import jwt
+import grpc
 
-from config import *
+from modules.rpc import auth_pb2
+from modules.rpc import auth_pb2_grpc
+from modules.rpc import user_pb2
+from modules.rpc import user_pb2_grpc
+from modules.rpc import candidate_pb2
+from modules.rpc import candidate_pb2_grpc
+
+from modules.config.config import *
 
 class ResponseError(Exception):
     """ class raised when services error happen"""
@@ -15,101 +23,88 @@ class ResponseError(Exception):
 
 class VoteServices:
 
-    def __init__(self, username=None, password=None, token=None):
-        if username and password:
-            token, username = self.get_token(username, password)
-            self._token = token
-        else:
-            self._token = token
-
-    def remote_call(self, routes, payload=None, identifier=None):
-        """ remote call"""
-        # append identifier to URL
-        if identifier is not None:
-            url = BASE_URL + ROUTES[routes]
-            url = url.format(identifier)
-        else:
-            url = BASE_URL + ROUTES[routes]
-
-        # set token only if its not login
-        if routes != "LOGIN":
-            headers = {
-                "Authorization" : "Bearer {}".format(self._token),
-                "Content-Type" : "application/json"
-            }
-        else:
-            headers = {}
-
-        if payload is not None:
-            response = requests.post(
-                url,
-                data=payload,
-                timeout=TIMEOUT,
-                headers=headers
-            )
-        else:
-            response = requests.get(
-                url,
-                timeout=TIMEOUT,
-                headers=headers
-            )
-
-        if response.ok:
-            response = response.json()
-        else:
-            print(response.json())
-            raise ResponseError(response.json()["error"])
-        return response
+    def __init__(self, token=None):
+        self.channel = grpc.insecure_channel(GRPC_CHANNEL)
+        self._access_token = token
 
     def get_token(self, username, password):
-        routes = "LOGIN"
-        payload = {
-            "username" : username,
-            "password" : password
-        }
+        stub = auth_pb2_grpc.AuthStub(self.channel)
+        request = auth_pb2.AccessTokenRequest()
+        # build request body
+        request.username = username
+        request.password = password
         try:
-            response = self.remote_call(routes, payload)
-        except ResponseError as error:
-            if error.message == "USER_NOT_FOUND":
-                message = "Pengguna tidak ditemukan"
+            response = stub.GetAccessToken(request)
+        except grpc.RpcError as error:
+            print(error.code())
+            print(error.details())
+            message = "Token tidak valid"
             raise ResponseError(message)
         #end try
-        name = response["data"]["user"]["name"]
-        access_token = response["data"]["access_token"]
-        # trim information here so it only return access token and user name
-        return access_token, name
+        access_token = response.body.access_token
+        return access_token
 
-    def get_candidates(self, election_id):
-        routes = "CANDIDATES"
+    def get_user(self):
+        # decode token and extract user id
+        payload = jwt.decode(self._access_token, os.getenv("JWT_SECRET"),
+                             algorithms="HS256")
+
+        user_id = payload["user_id"]
+        stub = user_pb2_grpc.UserStub(self.channel)
+        request = user_pb2.GetUserRequest()
+        # build request body
+        request.header.access_token = self._access_token
+        request.header.user_id = user_id
+        try:
+            response = stub.GetUser(request)
+        except grpc.RpcError as error:
+            print(error.code())
+            print(error.details())
+            message = "Pengguna tidak ditemukan"
+            raise ResponseError(message)
+        #end try
+        return response.body
+
+    def get_candidates(self):
         sound_feedback = []
         trimmed_candidates = []
+
+        stub = candidate_pb2_grpc.CandidateStub(self.channel)
+        request = candidate_pb2.GetCandidateRequest()
+        request.header.access_token = self._access_token
+        request.header.election_id = os.getenv("ELECTION_ID")
+
         try:
-            response = self.remote_call(routes=routes, identifier=election_id)
-        except ResponseError as error:
-            if error.message == "ELECTION_NOT_FOUND":
-                message = "Pemilihan tidak ditemukan"
+            response = stub.GetCandidates(request)
+        except grpc.RpcError:
+            message = "Pemilihan tidak ditemukan"
             raise ResponseError(message)
         #end try
+
         # trim response
-        candidates = response["data"]
+        candidates = response.body
         # build list for sound feedback order
         for candidate in candidates:
-            if candidate['order_no']:
-                sound_feedback.append(candidate['order_no'])
-                sound_feedback.append(candidate['name'])
+            if candidate.order_no:
+                sound_feedback.append(candidate.order_no)
+                sound_feedback.append(candidate.name)
 
             trimmed_candidates.append({
-                "id" : candidate['id'],
-                "order_no" : candidate['order_no']
+                "id" : candidate.id,
+                "order_no" : candidate.order_no
             })
 
         return sound_feedback, trimmed_candidates
 
     def cast_vote(self, candidate_id):
-        routes = "VOTE"
+        """ cast a vote """
+        stub = candidate_pb2_grpc.CandidateStub(self.channel)
+        request = candidate_pb2.CastVoteRequest()
+        request.header.access_token = self._access_token
+        request.header.candidate_id = candidate_id
         try:
-            response = self.remote_call(routes, {}, candidate_id)
-        except ResponseError as error:
-            raise ResponseError(error.message)
+            response = stub.CastVote(request)
+        except grpc.RpcError as error:
+            raise ResponseError(error.details())
         #end try
         return response

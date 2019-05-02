@@ -51,3 +51,7 @@ class TestMockSpeechProcessing(unittest.TestCase):
         }]
         result = SpeechProcessing._order_no_to_candidate_id(candidates, "2")
         self.assertEqual(result, "asdjlaksjldkjalsjdlsja")
+
+    def test_convert_to_command(self):
+        result = SpeechProcessing()._convert_to_command("hallo kelvin")
+        print(result)
