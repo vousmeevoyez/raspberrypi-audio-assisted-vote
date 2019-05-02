@@ -3,7 +3,7 @@
 """
 import time
 from subprocess import call
-from config.config import *
+from config import *
 
 def text_to_speech(sentences):
     """

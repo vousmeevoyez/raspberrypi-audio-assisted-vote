@@ -20,7 +20,7 @@ from google.cloud.speech import types
 
 from stream import MicrophoneStream
 # configuration
-from config.config import *
+from config import *
 # services
 from services import *
 # speak utility

@@ -19,7 +19,7 @@ from google.cloud.speech import enums
 from google.cloud.speech import types
 import pyaudio
 # configuration
-from config.config import *
+from config import *
 
 """
     CONSUME ERROR CODE HERE SO IT DISPLAY LOG CORRECTLY

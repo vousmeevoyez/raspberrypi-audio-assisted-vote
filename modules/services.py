@@ -7,14 +7,14 @@ import os
 import jwt
 import grpc
 
-from modules.rpc import auth_pb2
-from modules.rpc import auth_pb2_grpc
-from modules.rpc import user_pb2
-from modules.rpc import user_pb2_grpc
-from modules.rpc import candidate_pb2
-from modules.rpc import candidate_pb2_grpc
+from rpc import auth_pb2
+from rpc import auth_pb2_grpc
+from rpc import user_pb2
+from rpc import user_pb2_grpc
+from rpc import candidate_pb2
+from rpc import candidate_pb2_grpc
 
-from modules.config.config import *
+from config import *
 
 class ResponseError(Exception):
     """ class raised when services error happen"""
