@@ -80,11 +80,12 @@ class SpeechProcessing:
             if count < 2:
                 response["status"] = "UNKNOWN"
                 sentences.append("Perintah terlalu pendek")
+                response["feedback"] = sentences
                 return response
             #end if
             command, value = transcript.split(" ")
         except ValueError:
-            pass
+            sentences.append("Perintah terlalu pendek")
         #end try
 
         # match first word with all registered command
