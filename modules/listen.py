@@ -113,8 +113,11 @@ class SpeechProcessing:
         elif re.search(r'\btampilkan\b', transcript, re.I):
             try:
                 #authenticate as admin
+                admin_token = VoteServices().get_token(os.environ.get("ADMIN_USERNAME"),
+                                                       os.environ.get("ADMIN_PASSWORD"))
+                # get user information
                 sound_feedback, candidates = \
-                VoteServices(self._token).get_candidates()
+                VoteServices(admin_token).get_candidates(os.environ.get("ELECTION_ID"))
                 # set sound feedbcak + instruction
                 for feedback in sound_feedback:
                     sentences.append(feedback)
@@ -138,7 +141,7 @@ class SpeechProcessing:
             try:
                 # convert order no to candidate_id
                 candidate_id = self._order_no_to_candidate_id(self._candidates, order_no)
-                response = VoteServices(self._token).cast_vote(candidate_id)
+                result = VoteServices(self._token).cast_vote(candidate_id)
                 sentences.append(SPEECH_RESPONSE["THIRD_STEP"])
             except ResponseError as error:
                 sentences.append(error.message)
