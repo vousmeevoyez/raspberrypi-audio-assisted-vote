@@ -9,6 +9,7 @@ LANGUAGE = "id-ID" # set indonesian language
 TIMEOUT = 10 # second time out
 HELPER_KEYWORD = ["instruksi", "pilih", "masuk", "daftar", "kandidat"]
 SPEECH_MODEL = "command_and_search"
+#SPEECH_MODEL = "default"
 GRPC_CHANNEL = "34.80.69.106:5001"
 SPEECH_RESPONSE = {
     "INSTRUCTION": "Berikut adalah petunjuk penggunaan sistem: sistem mengenali 3 buah instruksi yaitu masuk nomor identitas, daftar kandidat, pilih kandidat ",
