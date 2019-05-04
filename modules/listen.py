@@ -69,6 +69,17 @@ class SpeechProcessing:
         #end for
         return finalize_transcript
 
+    @staticmethod
+    def play_introduction():
+        """ convert defined text to introduction speech """
+        instruction_list = []
+        instruction_list.append(SPEECH_RESPONSE["INSTRUCTION"])
+        instruction_list.append(SPEECH_RESPONSE["INSTRUCTION_FIRST"])
+        instruction_list.append(SPEECH_RESPONSE["INSTRUCTION_SECOND"])
+        instruction_list.append(SPEECH_RESPONSE["INSTRUCTION_THIRD"])
+        instruction_list.append(SPEECH_RESPONSE["INSTRUCTION_FOUR"])
+        text_to_speech(instruction_list)
+
     def _convert_to_command(self, transcript):
         """
             match transcript to known command
@@ -224,7 +235,6 @@ class SpeechProcessing:
 
             responses = client.streaming_recognize(streaming_config, requests)
             transcript = self._convert_to_transcript(responses)
-            print(transcript)
             logging.info(transcript)
             feedback = self._convert_to_command(transcript)
             logging.info(feedback)
@@ -232,6 +242,7 @@ class SpeechProcessing:
             stream.closed = True
 
     def start(self):
+        self.play_introduction()
         message = input("press enter to quit")
         GPIO.cleanup()
 
