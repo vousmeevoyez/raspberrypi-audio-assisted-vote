@@ -12,7 +12,7 @@ SPEECH_MODEL = "command_and_search"
 #SPEECH_MODEL = "default"
 GRPC_CHANNEL = "34.80.69.106:5001"
 SPEECH_RESPONSE = {
-    "INSTRUCTION": "Berikut adalah petunjuk penggunaan sistem: sistem mengenali 3 buah instruksi yaitu masuk nomor identitas, daftar kandidat, pilih kandidat ",
+    "INSTRUCTION": "Berikut adalah petunjuk penggunaan sistem: sistem mengenali 3 buah instruksi yaitu masuk nomor identitas, daftar kandidat, pilih kandidat, untuk berpindah dari satu instruksi ke instruksi lain tinggal menekan tombol",
     "INSTRUCTION_FIRST": "Langkah pertama adalah autentikasi: untuk masuk kedalam sistem cukup katakan masuk nomor identitas yang nanti akan diberikan oleh admin contoh masuk satu",
     "INSTRUCTION_SECOND": "Langkah kedua adalah daftar kandidat: setelah masuk kedalam sistem cukup katakan daftar kandidat",
     "INSTRUCTION_THIRD": "Langkah ketiga adalah pilih kandidat: setelah mengetahui daftar kandidat cukup katakan pilih nomor kandidat yang diinginkan contoh pilih satu",

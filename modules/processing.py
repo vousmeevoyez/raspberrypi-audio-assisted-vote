@@ -254,6 +254,7 @@ if __name__ == '__main__':
     button_pin = 3
 
     speech_processing = SpeechProcessing()
+    speech_processing.play_introduction()
 
     GPIO.setwarnings(False) # Ignore warning for now
     GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
