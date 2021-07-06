@@ -9,7 +9,7 @@ chardet==3.0.4
 Click==7.0
 coverage==4.5.2
 cryptography==2.5
-Django==2.1.1
+Django==2.2.24
 docutils==0.14
 Flask==1.0.2
 flask-restplus==0.12.1
